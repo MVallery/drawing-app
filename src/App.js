@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 const App = () => {
   const [points, setPoints] = useState([]);
   const [mouseDown, setMouseDown] = useState(false);
+  const [touchStart, setTouchStart] = useState(false);
+
   let lines = [];
 
   for (let x = 0; x < points.length; x++) {
@@ -45,14 +47,23 @@ const App = () => {
   const handleMouseDown = (e) => {
     setMouseDown(!mouseDown);
   };
+  const handleTouchStart = (e) => {
+    setTouchStart(!touchStart)
+  }
   const handleMouseUp = (e) => {
     const tempPoints = JSON.parse(JSON.stringify(points));
     tempPoints.push([null, null]);
     setPoints(tempPoints);
     setMouseDown(!mouseDown);
   };
-
+  const handleTouchEnd = (e) => {
+    const tempPoints = JSON.parse(JSON.stringify(points));
+    tempPoints.push([null, null]);
+    setPoints(tempPoints);
+    setTouchStart(!touchStart)
+  }
   const handleClick = (e) => {
+    console.log('handleclick')
     let newPoints = JSON.parse(JSON.stringify(points));
     var rect = document.getElementById("container").getBoundingClientRect();
     newPoints.push([e.clientX - rect.left, e.clientY - rect.top], [null, null]);
@@ -67,6 +78,8 @@ const App = () => {
       onClick={handleClick}
       onMouseUp={handleMouseUp}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       onMouseMove={
         mouseDown
           ? (e) => {
@@ -80,7 +93,7 @@ const App = () => {
           : null
       }
       onTouchMove={
-        mouseDown
+        touchStart
           ? (e) => {
               let newPoints = JSON.parse(JSON.stringify(points));
               var rect = document
