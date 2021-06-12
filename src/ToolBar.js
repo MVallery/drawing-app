@@ -6,17 +6,16 @@ const ToolBar = props => {
   const [colorSelect, setColorSelect] = useState('rgb(20,20,10,5)')
 
   const handleColorSelect = e => {
-    console.log(e)
     const {r, b, g, a} = e.rgb
     setColorSelect(`rgba(${r}, ${g}, ${b}, ${a})`)
-    handleTool('color',`rgba(${r}, ${g}, ${b}, ${a})`)
+    updateToolSettingsClick('color',`rgba(${r}, ${g}, ${b}, ${a})`)
   }
-  const handleTool = (property, value) => {
+  const updateToolSettingsClick = (property, value) => {
     let tempToolSettings = JSON.parse(JSON.stringify(props.toolSettings));
     tempToolSettings[property] = value;
     props.handleToolSettings(tempToolSettings)
   }
-  const handleChange = (e) => {
+  const updateToolSettingsChange = (e) => {
     const { name, value } = e.target;
     let tempToolSettings = JSON.parse(JSON.stringify(props.toolSettings));
     tempToolSettings[name] = value;
@@ -27,11 +26,14 @@ const ToolBar = props => {
     <React.Fragment>
       <div style={{display:'flex'}}>
         <div>
-          <input value={props.toolSettings.size} name='size' type="number" max={50} min={1} onChange={handleChange}/>
+          <button style={{width:'50px',height:'50px'}} onClick={props.clearPoints}>Clear All</button>
         </div>
         <div>
-          <button style={{backgroundColor:'white', width:'50px',height:'50px'}} onClick={()=>{handleTool('color','white')}}>
-
+          <input style={{width:'40px',height:'40px', fontSize:'20px'}} value={props.toolSettings.size} name='size' type="number" max="50" min="1" onChange={updateToolSettingsChange}/>
+        </div>
+        <div>
+          <button style={{backgroundColor:'white', width:'50px',height:'50px'}} onClick={()=>{updateToolSettingsClick('color','white')}}>
+            Erase
           </button>
         </div>
         <div style={{position:'relative'}}>
