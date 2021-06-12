@@ -22,25 +22,47 @@ const App = (props) => {
   const closeColorPicker = (e) => {
     setDisplayColorPicker(false)
   }
-  const handleMouseDown = (e) => {
+  const onMouseDown = (e) => {
     setMouseDown(!mouseDown);
   };
-  const handleMouseUp = (e) => {
+  const onMouseUp = (e) => {
     const tempPoints = JSON.parse(JSON.stringify(points));
     tempPoints.push([null, null]);
     setPoints(tempPoints);
     setMouseDown(!mouseDown);
   };
-  const handleTouchStart = (e) => {
+  const onMouseMove = (e) => {
+    let newPoints = JSON.parse(JSON.stringify(points));
+    var rect = document.getElementById("container").getBoundingClientRect();
+    newPoints.push({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      color: toolSettings.color,
+      size: toolSettings.size,
+    });
+    setPoints(newPoints);
+  }
+  const onTouchMove = (e) =>{
+    let newPoints = JSON.parse(JSON.stringify(points));
+    var rect = document.getElementById("container").getBoundingClientRect();
+    newPoints.push({
+      x: e.touches[0].pageX - rect.left,
+      y: e.touches[0].pageY - rect.top,
+      color: toolSettings.color,
+      size: toolSettings.size,
+    });
+    setPoints(newPoints);
+  }
+  const onTouchStart = (e) => {
     setTouchStart(!touchStart)
   }
-  const handleTouchEnd = (e) => {
+  const onTouchEnd = (e) => {
     const tempPoints = JSON.parse(JSON.stringify(points));
     tempPoints.push([null, null]);
     setPoints(tempPoints);
     setTouchStart(!touchStart)
   }
-  const handleClick = (e) => {
+  const onCanvasClick = (e) => {
     let newPoints = JSON.parse(JSON.stringify(points));
     var rect = document.getElementById("container").getBoundingClientRect();
     newPoints.push({x:e.clientX - rect.left, y:e.clientY - rect.top, color:toolSettings.color, size:toolSettings.size}, [null, null]);
@@ -54,7 +76,7 @@ const App = (props) => {
   }
   for (let x = 0; x < points.length; x++) {
     if (points[x][0] !== null && (x === 0 || points[x - 1][0] === null)) {
-      //if it's the first point in the array or if the previous point was null -make an individual point points[x-1][0]===null)
+      //if it's the first point in the array or if the previous point was null -make an individual point/start new line)
       lines.push(
         <line
           x1={String(points[x].x)}
@@ -87,7 +109,7 @@ const App = (props) => {
 
   return (
     <React.Fragment>
-      <div className="mainContainer">
+      <div className="mainContainer" onMouseUp={onMouseUp} onTouchEnd={onTouchEnd}>
         <ToolBar
           closeColorPicker={closeColorPicker}
           displayColorPicker={displayColorPicker}
@@ -95,7 +117,6 @@ const App = (props) => {
           toolSettings={toolSettings}
           handleToolSettings={handleToolSettings}
           clearPoints={clearPoints}
-
         />
 
         <svg
@@ -106,45 +127,13 @@ const App = (props) => {
             height: "500px",
             background: toolSettings.background,
           }}
-          onClick={handleClick}
-          onMouseUp={handleMouseUp}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          onMouseMove={
-            mouseDown
-              ? (e) => {
-                  let newPoints = JSON.parse(JSON.stringify(points));
-                  var rect = document
-                    .getElementById("container")
-                    .getBoundingClientRect();
-                  newPoints.push({
-                    x: e.clientX - rect.left,
-                    y: e.clientY - rect.top,
-                    color: toolSettings.color,
-                    size: toolSettings.size,
-                  });
-                  setPoints(newPoints);
-                }
-              : null
-          }
-          onTouchMove={
-            touchStart
-              ? (e) => {
-                  let newPoints = JSON.parse(JSON.stringify(points));
-                  var rect = document
-                    .getElementById("container")
-                    .getBoundingClientRect();
-                  newPoints.push({
-                    x: e.touches[0].pageX - rect.left,
-                    y: e.touches[0].pageY - rect.top,
-                    color: toolSettings.color,
-                    size: toolSettings.size,
-                  });
-                  setPoints(newPoints);
-                }
-              : null
-          }
+          onClick={onCanvasClick}
+          onMouseUp={onMouseUp}
+          onMouseDown={onMouseDown}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          onMouseMove={mouseDown ? onMouseMove : null}
+          onTouchMove={touchStart ? onTouchMove : null}
         >
           {lines}
         </svg>
