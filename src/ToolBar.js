@@ -18,22 +18,29 @@ const ToolBar = props => {
   }
   return (
     <React.Fragment>
-      <button style={{width:'20px', height:'10px', backgroundColor:colorSelect}} className="colorPickerButton" onClick={props.handleDisplayColorPicker}>
+      <div>
+        <div style={{position:'relative'}}>
+        <button style={{width:'20px', height:'10px', backgroundColor:colorSelect}} className="colorPickerButton" onClick={props.handleDisplayColorPicker}>
         
-      </button>
-      {props.displayColorPicker?
-        <ClickAwayListener onClickAway={props.closeColorPicker}>
+        </button>
+        {props.displayColorPicker?
+          <ClickAwayListener onClickAway={props.closeColorPicker}>
+            <div style={{position:'absolute'}}>
+          <SketchPicker
+            color={colorSelect}
+            className="colorPicker"
+            onChange={(e) => {
+              handleColorSelect(e);
+            }}
+          />
+          </div>
+        </ClickAwayListener>
+  
+        :null
+      }
+        </div>
+      </div>
 
-      <SketchPicker
-      color={colorSelect}
-      className="colorPicker"
-      onChange={(e) => {
-        handleColorSelect(e);
-      }}/>
-      </ClickAwayListener>
-
-      :null
-    }
     </React.Fragment>
   )
 
