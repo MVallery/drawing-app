@@ -22,6 +22,7 @@ const App = () => {
   const closeColorPicker = (e) => {
     setDisplayColorPicker(false)
   }
+
   for (let x = 0; x < points.length; x++) {
     if (points[x][0] !== null && (x === 0 || points[x - 1][0] === null)) {
       //if it's the first point in the array or if the previous point was null -make an individual point points[x-1][0]===null)
@@ -33,7 +34,7 @@ const App = () => {
           y2={String(points[x][1])}
           style={{
             stroke: points[x][2],
-            strokeWidth: toolSettings.size,
+            strokeWidth: points[x][3],
             strokeLinecap: "round",
           }}
         />
@@ -47,7 +48,7 @@ const App = () => {
           y2={String(points[x][1])}
           style={{
             stroke: points[x][2],
-            strokeWidth: toolSettings.size,
+            strokeWidth: points[x][3],
             strokeLinecap:"round",
           }}
         />
@@ -76,7 +77,7 @@ const App = () => {
     console.log('handleclick')
     let newPoints = JSON.parse(JSON.stringify(points));
     var rect = document.getElementById("container").getBoundingClientRect();
-    newPoints.push([e.clientX - rect.left, e.clientY - rect.top, toolSettings.color], [null, null]);
+    newPoints.push([e.clientX - rect.left, e.clientY - rect.top, toolSettings.color, toolSettings.size], [null, null]);
     setPoints(newPoints);
   };
   console.log(lines);
@@ -105,7 +106,7 @@ const App = () => {
               var rect = document
                 .getElementById("container")
                 .getBoundingClientRect();
-              newPoints.push([e.clientX - rect.left, e.clientY - rect.top, toolSettings.color]);
+              newPoints.push([e.clientX - rect.left, e.clientY - rect.top, toolSettings.color, toolSettings.size]);
               setPoints(newPoints);
             }
           : null
@@ -120,7 +121,8 @@ const App = () => {
               newPoints.push([
                 e.touches[0].pageX - rect.left,
                 e.touches[0].pageY - rect.top,
-                toolSettings.color
+                toolSettings.color,
+                toolSettings.size
               ]);
               setPoints(newPoints);
             }

@@ -16,11 +16,26 @@ const ToolBar = props => {
     tempToolSettings[property] = value;
     props.handleToolSettings(tempToolSettings)
   }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    let tempToolSettings = JSON.parse(JSON.stringify(props.toolSettings));
+    tempToolSettings[name] = value;
+    props.handleToolSettings(tempToolSettings)
+
+  };
   return (
     <React.Fragment>
-      <div>
+      <div style={{display:'flex'}}>
+        <div>
+          <input value={props.toolSettings.size} name='size' type="number" max={50} min={1} onChange={handleChange}/>
+        </div>
+        <div>
+          <button style={{backgroundColor:'white', width:'50px',height:'50px'}} onClick={()=>{handleTool('color','white')}}>
+
+          </button>
+        </div>
         <div style={{position:'relative'}}>
-        <button style={{width:'20px', height:'10px', backgroundColor:colorSelect}} className="colorPickerButton" onClick={props.handleDisplayColorPicker}>
+        <button style={{width:'50px', height:'50px', backgroundColor:colorSelect}} className="colorPickerButton" onClick={props.handleDisplayColorPicker}>
         
         </button>
         {props.displayColorPicker?
