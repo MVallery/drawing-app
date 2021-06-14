@@ -1,9 +1,13 @@
 import React, {useState} from 'react';
 import {SketchPicker} from 'react-color';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Button from '@material-ui/core/Button';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 
 const ToolBar = props => {
   const [colorSelect, setColorSelect] = useState('rgb(20,20,10,5)')
+  const [shapeMenu, setShapeMenu] = useState(null);
 
   const handleColorSelect = e => {
     const {r, b, g, a} = e.rgb
@@ -20,11 +24,45 @@ const ToolBar = props => {
     let tempToolSettings = JSON.parse(JSON.stringify(props.toolSettings));
     tempToolSettings[name] = value;
     props.handleToolSettings(tempToolSettings)
-
   };
+
+  const openShapeMenu = (event) => {
+    setShapeMenu(event.currentTarget);
+  };
+
+  const closeShapeMenu = () => {
+    setShapeMenu(null);
+  };
+
+  const selectShape = (shape) =>{
+    closeShapeMenu();
+    if (shape==='line'){
+      updateToolSettingsClick('shape', 'line');
+    }
+    else if (shape==='circle'){
+      updateToolSettingsClick('shape', 'circle');
+
+    }
+  }
   return (
     <React.Fragment>
       <div style={{display:'flex'}}>
+        <div>
+          <Button style={{width:'50px', height:'50px'}} aria-controls="simple-menu" aria-haspopup="true" onClick={openShapeMenu}>
+        Shape {props.toolSettings.shape==='circle'? 'o' : '/'}
+      </Button>
+      <Menu
+        id="simple-menu"
+        anchorEl={shapeMenu}
+        keepMounted
+        open={Boolean(shapeMenu)}
+        onClose={closeShapeMenu}
+      >
+        <MenuItem onClick={()=>selectShape('line')}>Line</MenuItem>
+        <MenuItem onClick={()=>selectShape('circle')}>Circle</MenuItem>
+        {/* <MenuItem onClick={()=>selectShape}>Logout</MenuItem> */}
+      </Menu>
+        </div>
         <div>
           <button style={{width:'50px',height:'50px'}} onClick={props.clearPoints}>Clear All</button>
         </div>
@@ -43,15 +81,15 @@ const ToolBar = props => {
         {props.displayColorPicker?
           <ClickAwayListener onClickAway={props.closeColorPicker}>
             <div style={{position:'absolute'}}>
-          <SketchPicker
-            color={colorSelect}
-            className="colorPicker"
-            onChange={(e) => {
-              handleColorSelect(e);
-            }}
-          />
-          </div>
-        </ClickAwayListener>
+              <SketchPicker
+                color={colorSelect}
+                className="colorPicker"
+                onChange={(e) => {
+                  handleColorSelect(e);
+                }}
+              />
+            </div>
+          </ClickAwayListener>
   
         :null
       }

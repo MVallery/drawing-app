@@ -5,16 +5,16 @@ import ToolBar from "./ToolBar";
 const initialToolSettings = {
   size:10,
   color:'black',
-  style:'normal', //normal, calligraphy, crazy
+  style:'normal', 
   background:'white',
   shape:"line",
 }
+
 const App = (props) => {
   const [points, setPoints] = useState([]);
   const [mouseDown, setMouseDown] = useState(false);
   const [touchStart, setTouchStart] = useState(false);
   const [toolSettings, setToolSettings] = useState(initialToolSettings)
-  let lines = [];
   const [displayColorPicker, setDisplayColorPicker] = useState(false)
   const handleDisplayColorPicker= () =>{
     setDisplayColorPicker(!displayColorPicker)
@@ -23,29 +23,41 @@ const App = (props) => {
     setDisplayColorPicker(false)
   }
   const onMouseDown = (e) => {
-    setMouseDown(!mouseDown);
+    setMouseDown(true);
   };
   const onMouseUp = (e) => {
     const tempPoints = JSON.parse(JSON.stringify(points));
     tempPoints.push([null, null]);
     setPoints(tempPoints);
-    setMouseDown(!mouseDown);
+    setMouseDown(false);
   };
   const onMouseMove = (e) => {
-    let newPoints = JSON.parse(JSON.stringify(points));
+    let tempPoints = JSON.parse(JSON.stringify(points));
     var rect = document.getElementById("container").getBoundingClientRect();
-    newPoints.push({
+
+    if (toolSettings.shape==='circle'){
+      return
+    }
+    tempPoints.push({
+      shape:toolSettings.shape,
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
       color: toolSettings.color,
       size: toolSettings.size,
     });
-    setPoints(newPoints);
+      setPoints(tempPoints)
+
+
+
   }
   const onTouchMove = (e) =>{
     let newPoints = JSON.parse(JSON.stringify(points));
     var rect = document.getElementById("container").getBoundingClientRect();
+    if (toolSettings.shape==='circle'){
+      return
+    }
     newPoints.push({
+      shape:toolSettings.shape,
       x: e.touches[0].pageX - rect.left,
       y: e.touches[0].pageY - rect.top,
       color: toolSettings.color,
@@ -54,18 +66,18 @@ const App = (props) => {
     setPoints(newPoints);
   }
   const onTouchStart = (e) => {
-    setTouchStart(!touchStart)
+    setTouchStart(true)
   }
   const onTouchEnd = (e) => {
     const tempPoints = JSON.parse(JSON.stringify(points));
     tempPoints.push([null, null]);
     setPoints(tempPoints);
-    setTouchStart(!touchStart)
+    setTouchStart(false)
   }
   const onCanvasClick = (e) => {
     let newPoints = JSON.parse(JSON.stringify(points));
     var rect = document.getElementById("container").getBoundingClientRect();
-    newPoints.push({x:e.clientX - rect.left, y:e.clientY - rect.top, color:toolSettings.color, size:toolSettings.size}, [null, null]);
+    newPoints.push({shape:toolSettings.shape,x:e.clientX - rect.left, y:e.clientY - rect.top, color:toolSettings.color, size:toolSettings.size}, [null, null]);
     setPoints(newPoints);
   };
   const handleToolSettings = (state) => {
@@ -74,36 +86,53 @@ const App = (props) => {
   const clearPoints = () => {
     setPoints([])
   }
-  for (let x = 0; x < points.length; x++) {
-    if (points[x][0] !== null && (x === 0 || points[x - 1][0] === null)) {
+  let svgShapes = [];
+
+  for (let i = 0; i < points.length; i++) {
+    if (points[i].shape==='circle'){
+      svgShapes.push(
+        <circle
+          cx={String(points[i].x)}
+          cy={String(points[i].y)}
+          r= {String(points[i].size)}
+          fill = {String(points[i].color)}
+
+        />
+      );
+    }else if (points[i][0] !== null && (i === 0 || points[i - 1][0] === null)) {
       //if it's the first point in the array or if the previous point was null -make an individual point/start new line)
-      lines.push(
-        <line
-          x1={String(points[x].x)}
-          y1={String(points[x].y)}
-          x2={String(points[x].x)}
-          y2={String(points[x].y)}
-          style={{
-            stroke: points[x].color,
-            strokeWidth: points[x].size,
-            strokeLinecap: "round",
-          }}
-        />
-      );
-    } else if (points[x][0] !== null && points[x - 1][0] !== null) {
-      lines.push(
-        <line
-          x1={String(points[x - 1].x)}
-          y1={String(points[x - 1].y)}
-          x2={String(points[x].x)}
-          y2={String(points[x].y)}
-          style={{
-            stroke: points[x].color,
-            strokeWidth: points[x].size,
-            strokeLinecap:"round",
-          }}
-        />
-      );
+      if (points[i].shape === 'line'){
+        svgShapes.push(
+            <line
+              x1={String(points[i].x)}
+              y1={String(points[i].y)}
+              x2={String(points[i].x)}
+              y2={String(points[i].y)}
+              style={{
+                stroke: points[i].color,
+                strokeWidth: points[i].size,
+                strokeLinecap: "round",
+              }}
+            />
+          );
+      } 
+    } else if (points[i][0] !== null && points[i - 1][0] !== null) {
+      if (points[i].shape === 'line'){
+        svgShapes.push(
+            <line
+              x1={String(points[i - 1].x)}
+              y1={String(points[i - 1].y)}
+              x2={String(points[i].x)}
+              y2={String(points[i].y)}
+              style={{
+                stroke: points[i].color,
+                strokeWidth: points[i].size,
+                strokeLinecap:"round",
+              }}
+            />
+        )
+      } 
+    
     }
   }
 
@@ -135,7 +164,7 @@ const App = (props) => {
           onMouseMove={mouseDown ? onMouseMove : null}
           onTouchMove={touchStart ? onTouchMove : null}
         >
-          {lines}
+          {svgShapes}
         </svg>
       </div>
     </React.Fragment>
