@@ -36,32 +36,32 @@ const ToolBar = props => {
 
   const selectShape = (shape) =>{
     closeShapeMenu();
-    if (shape==='line'){
-      updateToolSettingsClick('shape', 'line');
-    }
-    else if (shape==='circle'){
-      updateToolSettingsClick('shape', 'circle');
-
-    }
+    props.clearLinePoints();
+    updateToolSettingsClick('shape', shape);
   }
   return (
     <React.Fragment>
       <div style={{display:'flex'}}>
         <div>
           <Button style={{width:'50px', height:'50px'}} aria-controls="simple-menu" aria-haspopup="true" onClick={openShapeMenu}>
-        Shape {props.toolSettings.shape==='circle'? 'o' : '/'}
-      </Button>
-      <Menu
-        id="simple-menu"
-        anchorEl={shapeMenu}
-        keepMounted
-        open={Boolean(shapeMenu)}
-        onClose={closeShapeMenu}
-      >
-        <MenuItem onClick={()=>selectShape('line')}>Line</MenuItem>
-        <MenuItem onClick={()=>selectShape('circle')}>Circle</MenuItem>
-        {/* <MenuItem onClick={()=>selectShape}>Logout</MenuItem> */}
-      </Menu>
+            Shape {props.toolSettings.shape==='circle'? 'o' : '/'}
+          </Button>
+          <Menu
+            id="simple-menu"
+            anchorEl={shapeMenu}
+            keepMounted
+            open={Boolean(shapeMenu)}
+            onClose={closeShapeMenu}
+          >
+            <MenuItem onClick={()=>selectShape('draw')}>Draw</MenuItem>
+            <MenuItem onClick={()=>selectShape('line')}>Line</MenuItem>
+            <MenuItem onClick={()=>selectShape('polygon')}>Polygon</MenuItem>
+
+            <MenuItem onClick={()=>selectShape('circle')}>Circle</MenuItem>
+            {/* <MenuItem onClick={()=>selectShape}>Rectangle</MenuItem> */}
+            {/* <MenuItem onClick={()=>selectShape}>Rectangle</MenuItem> */}
+
+          </Menu>
         </div>
         <div>
           <button style={{width:'50px',height:'50px'}} onClick={props.clearPoints}>Clear All</button>
