@@ -7,12 +7,25 @@ const initialToolSettings = {
   color:'black',
   style:'normal', 
   background:'white',
-  shape:"draw",
+  shape:'draw',
+}
+const inititalPoints = {
+  shape: 'draw',
+  x: null,
+  y: null,
+  x1: null,
+  y1:null,
+  x2:null,
+  y2:null,
+  color: 'black',
+  size: 10
+
+
 }
 
-const App = (props) => {
-  const [points, setPoints] = useState([]);
-  const [linePoints, setLinePoints] = useState([])
+const App = (props:any) => {
+  const [points, setPoints] = useState ([inititalPoints]);
+  const [linePoints, setLinePoints] = useState(Array());
   const [mouseDown, setMouseDown] = useState(false);
   const [touchStart, setTouchStart] = useState(false);
   const [toolSettings, setToolSettings] = useState(initialToolSettings)
@@ -20,13 +33,13 @@ const App = (props) => {
   const handleDisplayColorPicker= () =>{
     setDisplayColorPicker(!displayColorPicker)
   }
-  const closeColorPicker = (e) => {
+  const closeColorPicker = () => {
     setDisplayColorPicker(false)
   }
-  const onMouseDown = (e) => {
+  const onMouseDown = () => {
     setMouseDown(true);
   };
-  const onMouseUp = (e) => {
+  const onMouseUp = () => {
     const tempPoints = JSON.parse(JSON.stringify(points));
     if (toolSettings.shape==='polygon'){
       return;
@@ -35,9 +48,9 @@ const App = (props) => {
     setPoints(tempPoints);
     setMouseDown(false);
   };
-  const onMouseMove = (e) => {
+  const onMouseMove = (e: { clientX: number; clientY: number; }) => {
     let tempPoints = JSON.parse(JSON.stringify(points));
-    var rect = document.getElementById("container").getBoundingClientRect();
+    var rect = document.getElementById("container")!.getBoundingClientRect();
 
     if (toolSettings.shape==='draw'){
       tempPoints.push({
@@ -53,9 +66,9 @@ const App = (props) => {
     }
 
   }
-  const onTouchMove = (e) =>{
+  const onTouchMove = (e: React.TouchEvent) =>{
     let newPoints = JSON.parse(JSON.stringify(points));
-    var rect = document.getElementById("container").getBoundingClientRect();
+    var rect = document.getElementById("container")!.getBoundingClientRect();
     if (toolSettings.shape==='draw'){
       newPoints.push({
         shape:toolSettings.shape,
@@ -69,10 +82,10 @@ const App = (props) => {
       return
     }
   }
-  const onTouchStart = (e) => {
+  const onTouchStart = () => {
     setTouchStart(true)
   }
-  const onTouchEnd = (e) => {
+  const onTouchEnd = () => {
     const tempPoints = JSON.parse(JSON.stringify(points));
     if (toolSettings.shape==='polygon'){
       return;
@@ -81,14 +94,13 @@ const App = (props) => {
     setPoints(tempPoints);
     setTouchStart(false)
   }
-  const onCanvasClick = (e) => {
+  const onCanvasClick = (e: React.MouseEvent) => {
     let newPoints = JSON.parse(JSON.stringify(points));
-    var rect = document.getElementById("container").getBoundingClientRect();
-    console.log('click')
+    var rect = document.getElementById("container")!.getBoundingClientRect();
     if(toolSettings.shape==='line'){
       let tempLinePoints = linePoints;
       if (linePoints.length<2){
-        tempLinePoints.push(e.clientX -rect.left, e.clientY-rect.top)
+        tempLinePoints.push(e.clientX-rect.left, e.clientY-rect.top)
         setLinePoints(tempLinePoints)
       } else if (linePoints.length === 2) {
         tempLinePoints.push(e.clientX -rect.left, e.clientY-rect.top)
@@ -97,10 +109,8 @@ const App = (props) => {
       }
     } else if (toolSettings.shape==='polygon'){
       let tempLinePoints = linePoints;
-      console.log('polygon')
       if (linePoints.length<2){
         tempLinePoints.push(e.clientX -rect.left, e.clientY-rect.top)
-        console.log(e.clientX -rect.left, e.clientY-rect.top)
         setLinePoints(tempLinePoints)
       } else if (linePoints.length === 2) {
         tempLinePoints.push(e.clientX -rect.left, e.clientY-rect.top)
@@ -114,9 +124,7 @@ const App = (props) => {
 
     setPoints(newPoints);
   };
-  const handleToolSettings = (state) => {
-    setToolSettings(state)
-  }
+
   const clearPoints = () => {
     setPoints([])
   }
@@ -151,7 +159,7 @@ const App = (props) => {
         }}
       />
       );
-  }else if (points[i][0] !== null && (i === 0 || points[i - 1][0] === null)) {
+  }else if (points[i].x !== null && (i === 0 || points[i - 1].x === null)) {
       //if it's the first point in the array or if the previous point was null -make an individual point/start new line)
       if (points[i].shape === 'draw'){
         svgShapes.push(
@@ -168,7 +176,7 @@ const App = (props) => {
             />
           );
       } 
-    } else if (points[i][0] !== null && points[i - 1][0] !== null) {
+    } else if (points[i].x !== null && points[i - 1].x !== null) {
       if (points[i].shape === 'draw'){
         svgShapes.push(
             <line
@@ -191,12 +199,12 @@ const App = (props) => {
   return (
     <React.Fragment>
       <div className="mainContainer" onMouseUp={onMouseUp} onTouchEnd={onTouchEnd}>
-        <ToolBar
+        <ToolBar 
           closeColorPicker={closeColorPicker}
           displayColorPicker={displayColorPicker}
           handleDisplayColorPicker={handleDisplayColorPicker}
           toolSettings={toolSettings}
-          handleToolSettings={handleToolSettings}
+          setToolSettings = {setToolSettings}
           clearPoints={clearPoints}
           clearLinePoints={clearLinePoints}
         />
@@ -214,8 +222,8 @@ const App = (props) => {
           onMouseDown={onMouseDown}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
-          onMouseMove={mouseDown ? onMouseMove : null}
-          onTouchMove={touchStart ? onTouchMove : null}
+          onMouseMove={mouseDown ? onMouseMove : undefined}
+          onTouchMove={touchStart ? onTouchMove : undefined}
         >
           {svgShapes}
         </svg>

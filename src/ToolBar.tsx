@@ -4,29 +4,48 @@ import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-
-const ToolBar = props => {
+interface ToolSettings {
+  shape:string, color:string, size:number, style:string, background:string
+}
+interface Props {
+  closeColorPicker: ()=>void;
+  displayColorPicker: boolean;
+  handleDisplayColorPicker: ()=>void;
+  toolSettings: ToolSettings;
+  setToolSettings: React.Dispatch<React.SetStateAction<{
+    size: number;
+    color: string;
+    style: string;
+    background: string;
+    shape: string;
+}>>;
+  clearPoints: ()=>void;
+  clearLinePoints: ()=>void;
+}
+const ToolBar: React.FC<Props>= (props) => {
   const [colorSelect, setColorSelect] = useState('rgb(20,20,10,5)')
   const [shapeMenu, setShapeMenu] = useState(null);
 
-  const handleColorSelect = e => {
+  const handleColorSelect = (e:any) => {
     const {r, b, g, a} = e.rgb
     setColorSelect(`rgba(${r}, ${g}, ${b}, ${a})`)
     updateToolSettingsClick('color',`rgba(${r}, ${g}, ${b}, ${a})`)
   }
-  const updateToolSettingsClick = (property, value) => {
+  const updateToolSettingsClick = (property:string, value:string) => {
     let tempToolSettings = JSON.parse(JSON.stringify(props.toolSettings));
     tempToolSettings[property] = value;
-    props.handleToolSettings(tempToolSettings)
+    console.log(tempToolSettings)
+
+    props.setToolSettings(tempToolSettings)
   }
-  const updateToolSettingsChange = (e) => {
+  const updateToolSettingsChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     let tempToolSettings = JSON.parse(JSON.stringify(props.toolSettings));
     tempToolSettings[name] = value;
-    props.handleToolSettings(tempToolSettings)
+    props.setToolSettings(tempToolSettings)
   };
 
-  const openShapeMenu = (event) => {
+  const openShapeMenu = (event: { currentTarget: any; }) => {
     setShapeMenu(event.currentTarget);
   };
 
@@ -34,7 +53,7 @@ const ToolBar = props => {
     setShapeMenu(null);
   };
 
-  const selectShape = (shape) =>{
+  const selectShape = (shape: string) =>{
     closeShapeMenu();
     props.clearLinePoints();
     updateToolSettingsClick('shape', shape);
@@ -84,7 +103,7 @@ const ToolBar = props => {
               <SketchPicker
                 color={colorSelect}
                 className="colorPicker"
-                onChange={(e) => {
+                onChange={(e: any) => {
                   handleColorSelect(e);
                 }}
               />
