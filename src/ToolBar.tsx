@@ -30,6 +30,7 @@ const ToolBar: React.FC<Props>= (props) => {
     const {r, b, g, a} = e.rgb
     setColorSelect(`rgba(${r}, ${g}, ${b}, ${a})`)
     updateToolSettingsClick('color',`rgba(${r}, ${g}, ${b}, ${a})`)
+
   }
   const updateToolSettingsClick = (property:string, value:string) => {
     let tempToolSettings = JSON.parse(JSON.stringify(props.toolSettings));

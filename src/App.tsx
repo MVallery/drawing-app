@@ -10,6 +10,7 @@ interface InitialPoints {
   y1: number | null,
   x2: number | null,
   y2: number | null,
+  r: number | null,
   color: string,
   size: number
 }
@@ -28,6 +29,7 @@ const initialPoints = {
   y1: null,
   x2: null,
   y2: null,
+  r: null,
   color: 'black',
   size: 10
 }
@@ -50,9 +52,9 @@ const App = (props:any) => {
 
     console.log('onmousedown')
     let tempPoints = JSON.parse(JSON.stringify(points));
+    let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
     var rect = document.getElementById("container")!.getBoundingClientRect();
     if(toolSettings.shape==='line' || (toolSettings.shape==='polygon')){
-      let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
       if (!placeholderLine.x1){
         tempPlaceholderLine = {...tempPlaceholderLine, ...toolSettings, x1:e.clientX-rect.left, y1:e.clientY-rect.top}
         setPlaceholderLine({...tempPlaceholderLine});
@@ -63,7 +65,10 @@ const App = (props:any) => {
 
       }
 
-    } 
+    } else if (toolSettings.shape==='circle'){
+      setPlaceholderLine({...initialPoints, ...toolSettings, x:e.clientX-rect.left, y:e.clientY-rect.top})
+
+    }
   };
   const onMouseUp = (e: React.MouseEvent) => {
     const tempPoints = JSON.parse(JSON.stringify(points));
@@ -77,10 +82,12 @@ const App = (props:any) => {
       tempPoints.push(tempPlaceholderLine);
       setPlaceholderLine({...initialPoints, ...toolSettings});
 
-    } 
-    if(toolSettings.shape==='draw'){
+    } else if(toolSettings.shape==='draw'){
       tempPoints.push([null, null]);
 
+    } else if (toolSettings.shape==='circle'){
+      tempPoints.push(tempPlaceholderLine)
+      setPlaceholderLine({...initialPoints, ...toolSettings})
     }
     setPoints(tempPoints);
     setMouseDown(false);
@@ -90,6 +97,7 @@ const App = (props:any) => {
     let tempPoints = JSON.parse(JSON.stringify(points));
     let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
     var rect = document.getElementById("container")!.getBoundingClientRect();
+    closeColorPicker();
 
     if (toolSettings.shape==='draw'){
       tempPoints.push({
@@ -99,12 +107,21 @@ const App = (props:any) => {
         color: toolSettings.color,
         size: toolSettings.size,
       });
-        setPoints(tempPoints);
+      setPoints(tempPoints);
+
     } else if ((toolSettings.shape==='line'|| toolSettings.shape==='polygon') && placeholderLine.x1){
       tempPlaceholderLine = {...tempPlaceholderLine, x2:e.clientX - rect.left, y2:e.clientY- rect.top}
       setPlaceholderLine(tempPlaceholderLine);
 
-    }else{
+    } else if (toolSettings.shape==='circle'){
+      let radius = (Math.sqrt(
+                      (Math.abs(tempPlaceholderLine.x-(e.clientX-rect.left))**2)+
+                      (Math.abs(tempPlaceholderLine.y-(e.clientY-rect.top))**2)))
+      console.log(radius, tempPlaceholderLine)
+      tempPlaceholderLine = {...tempPlaceholderLine, r:radius, fill:toolSettings.color}
+      setPlaceholderLine(tempPlaceholderLine)
+    }
+    else{
       return
     }
 
@@ -189,16 +206,25 @@ const App = (props:any) => {
   let svgShapes = [];
   let svgTempLine = (
             <line
-            x1={String(placeholderLine.x1)}
-            y1={String(placeholderLine.y1)}
-            x2={String(placeholderLine.x2)}
-            y2={String(placeholderLine.y2)}
-            style={{
-              stroke: placeholderLine.color,
-              strokeWidth: placeholderLine.size,
-              strokeLinecap: "round",
+              x1={String(placeholderLine.x1)}
+              y1={String(placeholderLine.y1)}
+              x2={String(placeholderLine.x2)}
+              y2={String(placeholderLine.y2)}
+              style={{
+                stroke: placeholderLine.color,
+                strokeWidth: placeholderLine.size,
+                strokeLinecap: "round",
             }}
           />
+  )
+  let svgTempCircle = (
+          <circle
+            cx={String(placeholderLine.x)}
+            cy={String(placeholderLine.y)}
+            r={String(placeholderLine.r)}
+            fill = {String(toolSettings.color)}
+            />
+
   )
   for (let i = 0; i < points.length; i++) {
     if (points[i].shape==='circle'){
@@ -206,7 +232,7 @@ const App = (props:any) => {
         <circle
           cx={String(points[i].x)}
           cy={String(points[i].y)}
-          r= {String(points[i].size)}
+          r= {String(points[i].r)}
           fill = {String(points[i].color)}
 
         />
@@ -296,6 +322,7 @@ const App = (props:any) => {
         >
           {svgShapes}
           {(placeholderLine.x1 && placeholderLine.x2)?svgTempLine:null}
+          {placeholderLine.r ? svgTempCircle:null}
         </svg>
       </div>
       </div>
