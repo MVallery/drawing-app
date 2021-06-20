@@ -130,6 +130,8 @@ const App = (props:any) => {
     let newPoints = JSON.parse(JSON.stringify(points));
     let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
     var rect = document.getElementById("container")!.getBoundingClientRect();
+    closeColorPicker();
+
     if (toolSettings.shape==='draw'){
       newPoints.push({
         shape:toolSettings.shape,
@@ -143,6 +145,13 @@ const App = (props:any) => {
       tempPlaceholderLine = {...tempPlaceholderLine, x2:e.touches[0].pageX - rect.left, y2:e.touches[0].pageY- rect.top}
       setPlaceholderLine(tempPlaceholderLine);
 
+    }else if (toolSettings.shape==='circle'){
+      let radius = (Math.sqrt(
+                      (Math.abs(tempPlaceholderLine.x-(e.touches[0].pageX-rect.left))**2)+
+                      (Math.abs(tempPlaceholderLine.y-(e.touches[0].pageY-rect.top))**2)))
+      console.log(radius, tempPlaceholderLine)
+      tempPlaceholderLine = {...tempPlaceholderLine, r:radius, fill:toolSettings.color}
+      setPlaceholderLine(tempPlaceholderLine)
     }else {
       return
     }
@@ -163,7 +172,10 @@ const App = (props:any) => {
 
       }
 
-    } 
+    } else if (toolSettings.shape==='circle'){
+      setPlaceholderLine({...initialPoints, ...toolSettings, x:e.touches[0].pageX-rect.left, y:e.touches[0].pageY-rect.top})
+
+    }
   }
   const onTouchEnd = (e: React.TouchEvent) => {
     const tempPoints = JSON.parse(JSON.stringify(points));
@@ -177,10 +189,12 @@ const App = (props:any) => {
       tempPoints.push(tempPlaceholderLine);
       setPlaceholderLine({...initialPoints, ...toolSettings});
 
-    } 
-    if(toolSettings.shape==='draw'){
+    } else if(toolSettings.shape==='draw'){
       tempPoints.push([null, null]);
 
+    } else if (toolSettings.shape==='circle'){
+      tempPoints.push(tempPlaceholderLine)
+      setPlaceholderLine({...initialPoints, ...toolSettings})
     }
     setPoints(tempPoints);
     setTouchStart(false)
