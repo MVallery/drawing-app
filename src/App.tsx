@@ -111,6 +111,7 @@ const App = (props:any) => {
   }
   const onTouchMove = (e: React.TouchEvent) =>{
     let newPoints = JSON.parse(JSON.stringify(points));
+    let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
     var rect = document.getElementById("container")!.getBoundingClientRect();
     if (toolSettings.shape==='draw'){
       newPoints.push({
@@ -121,19 +122,49 @@ const App = (props:any) => {
         size: toolSettings.size,
       });
       setPoints(newPoints);
-    } else {
+    }  else if ((toolSettings.shape==='line'|| toolSettings.shape==='polygon') && placeholderLine.x1){
+      tempPlaceholderLine = {...tempPlaceholderLine, x2:e.touches[0].pageX - rect.left, y2:e.touches[0].pageY- rect.top}
+      setPlaceholderLine(tempPlaceholderLine);
+
+    }else {
       return
     }
   }
-  const onTouchStart = () => {
+  const onTouchStart = (e: React.TouchEvent) => {
     setTouchStart(true)
+    let tempPoints = JSON.parse(JSON.stringify(points));
+    let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
+    var rect = document.getElementById("container")!.getBoundingClientRect();
+    if(toolSettings.shape==='line' || (toolSettings.shape==='polygon')){
+      if (!placeholderLine.x1){
+        tempPlaceholderLine = {...tempPlaceholderLine, ...toolSettings, x1:e.touches[0].pageX-rect.left, y1:e.touches[0].pageY-rect.top}
+        setPlaceholderLine({...tempPlaceholderLine});
+      } 
+      if (toolSettings.shape==='polygon'){
+        tempPoints.push(tempPlaceholderLine)
+        setPlaceholderLine({...initialPoints, ...toolSettings, x1:tempPlaceholderLine.x1, y1:tempPlaceholderLine.y1})
+
+      }
+
+    } 
   }
-  const onTouchEnd = () => {
+  const onTouchEnd = (e: React.TouchEvent) => {
     const tempPoints = JSON.parse(JSON.stringify(points));
+    let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
     if (toolSettings.shape==='polygon'){
-      return;
+      tempPoints.push(tempPlaceholderLine);
+      tempPlaceholderLine = ({...initialPoints, ...toolSettings, x1:tempPlaceholderLine.x2, y1:tempPlaceholderLine.y2 })
+      setPlaceholderLine(tempPlaceholderLine);
+
+    } else if (toolSettings.shape==='line'){
+      tempPoints.push(tempPlaceholderLine);
+      setPlaceholderLine({...initialPoints, ...toolSettings});
+
+    } 
+    if(toolSettings.shape==='draw'){
+      tempPoints.push([null, null]);
+
     }
-    tempPoints.push([null, null]);
     setPoints(tempPoints);
     setTouchStart(false)
   }
