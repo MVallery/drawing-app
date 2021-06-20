@@ -20,7 +20,7 @@ interface Props {
     shape: string;
 }>>;
   clearPoints: ()=>void;
-  clearLinePoints: ()=>void;
+  clearPlaceholderLine: ()=>void;
 }
 const ToolBar: React.FC<Props>= (props) => {
   const [colorSelect, setColorSelect] = useState('rgb(20,20,10,5)')
@@ -55,7 +55,7 @@ const ToolBar: React.FC<Props>= (props) => {
 
   const selectShape = (shape: string) =>{
     closeShapeMenu();
-    props.clearLinePoints();
+    props.clearPlaceholderLine();
     updateToolSettingsClick('shape', shape);
   }
   return (
