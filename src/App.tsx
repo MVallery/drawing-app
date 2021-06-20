@@ -7,9 +7,9 @@ interface InitialPoints {
   x: number | null,
   y: number | null,
   x1: number | null,
-  y1:number | null,
-  x2:number | null,
-  y2:number | null,
+  y1: number | null,
+  x2: number | null,
+  y2: number | null,
   color: string,
   size: number
 }
@@ -25,16 +25,15 @@ const initialPoints = {
   x: null,
   y: null,
   x1: null,
-  y1:null,
-  x2:null,
-  y2:null,
+  y1: null,
+  x2: null,
+  y2: null,
   color: 'black',
   size: 10
 }
 
 const App = (props:any) => {
   const [points, setPoints] = useState ([initialPoints]);
-  const [tempLine, settempLine] = useState(Array());
   const [placeholderLine, setPlaceholderLine] = useState<InitialPoints>(initialPoints);
   const [mouseDown, setMouseDown] = useState(false);
   const [touchStart, setTouchStart] = useState(false);
@@ -55,12 +54,12 @@ const App = (props:any) => {
     if(toolSettings.shape==='line' || (toolSettings.shape==='polygon')){
       let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
       if (!placeholderLine.x1){
-        tempPlaceholderLine = {...tempPlaceholderLine, x1:e.clientX-rect.left, y1:e.clientY-rect.top, shape:'line'}
+        tempPlaceholderLine = {...tempPlaceholderLine, ...toolSettings, x1:e.clientX-rect.left, y1:e.clientY-rect.top}
         setPlaceholderLine({...tempPlaceholderLine});
       } 
       if (toolSettings.shape==='polygon'){
         tempPoints.push(tempPlaceholderLine)
-        setPlaceholderLine({...initialPoints, x1:tempPlaceholderLine.x1, y1:tempPlaceholderLine.y1, shape:'polygon'})
+        setPlaceholderLine({...initialPoints, ...toolSettings, x1:tempPlaceholderLine.x1, y1:tempPlaceholderLine.y1})
 
       }
 
@@ -70,18 +69,13 @@ const App = (props:any) => {
     const tempPoints = JSON.parse(JSON.stringify(points));
     let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
     var rect = document.getElementById("container")!.getBoundingClientRect();
-    console.log('onmouseup',tempPlaceholderLine);
-    console.log(e.clientX-rect.left);
-
     if (toolSettings.shape==='polygon'){
-      // tempPlaceholderLine = {...tempPlaceholderLine, x2:e.clientX - rect.left, y2:e.clientY- rect.top, shape:'polygon'}
       tempPoints.push(tempPlaceholderLine);
-      setPlaceholderLine({...initialPoints, x1:e.clientX - rect.left, y1:e.clientY- rect.top, shape:'polygon'});
+      setPlaceholderLine({...initialPoints, ...toolSettings, x1:e.clientX - rect.left, y1:e.clientY- rect.top});
 
     } else if (toolSettings.shape==='line'){
-      // tempPlaceholderLine = {...tempPlaceholderLine, x2:e.clientX - rect.left, y2:e.clientY- rect.top, shape:'line'}
       tempPoints.push(tempPlaceholderLine);
-      setPlaceholderLine({...initialPoints, shape:'line'});
+      setPlaceholderLine({...initialPoints, ...toolSettings});
 
     } 
     if(toolSettings.shape==='draw'){
@@ -144,17 +138,11 @@ const App = (props:any) => {
     setTouchStart(false)
   }
   const onCanvasClick = (e: React.MouseEvent) => {
-    console.log('oncanvas')
+    console.log('oncanvas', points)
     let tempPoints = JSON.parse(JSON.stringify(points));
     var rect = document.getElementById("container")!.getBoundingClientRect();
-    if(toolSettings.shape==='line' || (toolSettings.shape==='polygon')){
-      let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
-      if (!placeholderLine.x1){
-        tempPlaceholderLine = {...tempPlaceholderLine, x1:e.clientX-rect.left, y1:e.clientY-rect.top, shape:'line'};
-        setPlaceholderLine({...tempPlaceholderLine});
-      } 
-    }else{
-      tempPoints.push({shape:toolSettings.shape,x:e.clientX - rect.left, y:e.clientY - rect.top, color:toolSettings.color, size:toolSettings.size}, [null, null]);
+    if(toolSettings.shape==='draw'){
+      tempPoints.push({...toolSettings, x:e.clientX - rect.left, y:e.clientY - rect.top}, [null, null]);
     }
     setPoints(tempPoints);
   };
@@ -164,7 +152,7 @@ const App = (props:any) => {
     setPlaceholderLine(initialPoints);
   }
   const clearPlaceholderLine = () => {
-    settempLine([]);
+    // settempLine([]);
     setPlaceholderLine(initialPoints);
   }
   let svgShapes = [];
@@ -193,7 +181,7 @@ const App = (props:any) => {
         />
       );
 
-    }else if (points[i].shape==='line' || points[i].shape==='polygon'){
+    }else if ((points[i].shape==='line' || points[i].shape==='polygon') && points[i].x2){
       svgShapes.push(
         <line
         x1={String(points[i].x1)}
@@ -207,7 +195,7 @@ const App = (props:any) => {
         }}
       />
       );
-  }else if (points[i].x !== null && (i === 0 || points[i - 1].x === null)) {
+  }else if (points[i].x !== null && (i === 0 || points[i - 1].x === null || points[i-1].shape !== 'draw')) {
       //if it's the first point in the array or if the previous point was null -make an individual point/start new line)
       if (points[i].shape === 'draw'){
         svgShapes.push(
@@ -246,7 +234,7 @@ const App = (props:any) => {
 
   return (
     <React.Fragment>
-      <div className="mainContainer" onMouseUp={onMouseUp} onTouchEnd={onTouchEnd}>
+      <div className="toolbarContainer" style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
         <ToolBar 
           closeColorPicker={closeColorPicker}
           displayColorPicker={displayColorPicker}
@@ -256,6 +244,8 @@ const App = (props:any) => {
           clearPoints={clearPoints}
           clearPlaceholderLine={clearPlaceholderLine}
         />
+      <div className="mainContainer" onMouseUp={onMouseUp} onTouchEnd={onTouchEnd}>
+
 
         <svg
           id="container"
@@ -276,6 +266,7 @@ const App = (props:any) => {
           {svgShapes}
           {(placeholderLine.x1 && placeholderLine.x2)?svgTempLine:null}
         </svg>
+      </div>
       </div>
     </React.Fragment>
   );
