@@ -1,0 +1,8 @@
+.toolbarButton{
+  width:50px;
+  height:50px;
+  background-color:rgb(241, 241, 241);
+}
+.toolbarButton:hover{
+  cursor:pointer;
+}

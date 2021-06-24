@@ -1,6 +1,6 @@
 import "./App.css";
 import React, { useEffect, useState } from "react";
-import ToolBar from "./ToolBar";
+import Toolbar from "./Toolbar";
 
 interface InitialPoints {
   shape: string,
@@ -41,6 +41,7 @@ const App = (props:any) => {
   const [touchStart, setTouchStart] = useState(false);
   const [toolSettings, setToolSettings] = useState(initialToolSettings)
   const [displayColorPicker, setDisplayColorPicker] = useState(false)
+  const [removedPoints, setRemovedPoints] = useState([]);
   const handleDisplayColorPicker= () =>{
     setDisplayColorPicker(!displayColorPicker)
   };
@@ -71,6 +72,7 @@ const App = (props:any) => {
     }
   };
   const onMouseUp = (e: React.MouseEvent) => {
+    console.log('mouseup')
     const tempPoints = JSON.parse(JSON.stringify(points));
     let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
     var rect = document.getElementById("container")!.getBoundingClientRect();
@@ -210,12 +212,67 @@ const App = (props:any) => {
   };
 
   const clearPoints = () => {
+    let tempRemovedPoints = JSON.parse(JSON.stringify(removedPoints));
+    tempRemovedPoints = [...tempRemovedPoints, ...points];
     setPoints([]);
     setPlaceholderLine(initialPoints);
+    setRemovedPoints(tempRemovedPoints)
   }
   const clearPlaceholderLine = () => {
     // settempLine([]);
     setPlaceholderLine(initialPoints);
+  }
+  const undo = () => {
+    let tempPoints = JSON.parse(JSON.stringify(points));
+    let tempRemovedPoints = JSON.parse(JSON.stringify(removedPoints));
+    let removedPoint
+    if (!tempPoints){
+      return
+    } else if (tempPoints.length<2){
+      removedPoint = tempPoints.pop();
+      tempRemovedPoints.push(removedPoint)
+    } else if (tempPoints[tempPoints.length-2].shape==='draw'){ 
+      for(let i = tempPoints.length-1; i > 0; i--){
+        if (i>points.length-4 || points[i].shape==='draw'){
+          removedPoint = tempPoints.pop();
+          tempRemovedPoints.push(removedPoint)
+        } else {
+          break;
+        }
+      }
+    } else {
+      removedPoint = tempPoints.pop();
+      tempRemovedPoints.push(removedPoint)
+    }
+    setRemovedPoints(tempRemovedPoints)
+    setPoints(tempPoints)
+  }
+  const redo = () => {
+    let tempPoints = JSON.parse(JSON.stringify(points));
+    console.log(removedPoints)
+    let tempRemovedPoints = JSON.parse(JSON.stringify(removedPoints));
+    let removedPoint
+    if (!tempRemovedPoints){
+      return
+    } else if (tempRemovedPoints.length<2){
+      removedPoint = tempRemovedPoints.pop();
+      tempPoints.push(removedPoint)
+    } else if (tempRemovedPoints[tempRemovedPoints.length-2].shape==='draw'){ 
+      for(let i = tempRemovedPoints.length-1; i > 0; i--){
+        if (i>points.length-4 || points[i].shape==='draw'){
+          removedPoint = tempRemovedPoints.pop();
+          tempPoints.push(removedPoint)
+        } else {
+          console.log('break')
+          break;
+        }
+      }
+    } else {
+      removedPoint = tempRemovedPoints.pop();
+      tempPoints.push(removedPoint)
+    }
+    setRemovedPoints(tempRemovedPoints)
+    setPoints(tempPoints)
   }
   let svgShapes = [];
   let svgTempLine = (
@@ -238,7 +295,6 @@ const App = (props:any) => {
             r={String(placeholderLine.r)}
             fill = {String(toolSettings.color)}
             />
-
   )
   for (let i = 0; i < points.length; i++) {
     if (points[i].shape==='circle'){
@@ -248,7 +304,6 @@ const App = (props:any) => {
           cy={String(points[i].y)}
           r= {String(points[i].r)}
           fill = {String(points[i].color)}
-
         />
       );
 
@@ -306,7 +361,7 @@ const App = (props:any) => {
   return (
     <React.Fragment>
       <div className="toolbarContainer" style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
-        <ToolBar 
+        <Toolbar 
           closeColorPicker={closeColorPicker}
           displayColorPicker={displayColorPicker}
           handleDisplayColorPicker={handleDisplayColorPicker}
@@ -314,6 +369,8 @@ const App = (props:any) => {
           setToolSettings = {setToolSettings}
           clearPoints={clearPoints}
           clearPlaceholderLine={clearPlaceholderLine}
+          undo={undo}
+          redo={redo}
         />
       <div className="mainContainer" onMouseUp={onMouseUp} onTouchEnd={onTouchEnd}>
 
@@ -327,7 +384,7 @@ const App = (props:any) => {
             background: toolSettings.background,
           }}
           onClick={onCanvasClick}
-          onMouseUp={onMouseUp}
+          // onMouseUp={onMouseUp}
           onMouseDown={onMouseDown}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
