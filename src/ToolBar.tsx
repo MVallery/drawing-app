@@ -51,7 +51,7 @@ interface Props {
   clearPlaceholderLine: () => void;
 }
 const Toolbar: React.FC<Props> = (props) => {
-  const [colorSelect, setColorSelect] = useState("rgb(20,20,10,5)");
+  const [colorSelect, setColorSelect] = useState("rgba(20,20,10,5)");
   const [shapeMenu, setShapeMenu] = useState(null);
 
   const handleColorSelect = (e: any) => {
@@ -59,9 +59,12 @@ const Toolbar: React.FC<Props> = (props) => {
     setColorSelect(`rgba(${r}, ${g}, ${b}, ${a})`);
     updateToolSettingsClick("color", `rgba(${r}, ${g}, ${b}, ${a})`);
   };
-  const updateToolSettingsClick = (property: string, value: string) => {
+  const updateToolSettingsClick = (property: string, value: string, property2?:string, value2?: string) => {
     let tempToolSettings = JSON.parse(JSON.stringify(props.toolSettings));
     tempToolSettings[property] = value;
+    if (property2){
+      tempToolSettings[property2] = value2;
+    }
     props.setToolSettings(tempToolSettings);
   };
 
@@ -81,7 +84,7 @@ const Toolbar: React.FC<Props> = (props) => {
   const selectShape = (shape: string) => {
     closeShapeMenu();
     props.clearPlaceholderLine();
-    updateToolSettingsClick("shape", shape);
+    updateToolSettingsClick("color", colorSelect, "shape", shape)
   };
 
   const classes = useStyles();

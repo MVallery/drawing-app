@@ -1,12 +1,6 @@
 import React from 'react';
 import './ToolbarButton.css'
-interface ToolSettings {
-  shape: string;
-  color: string;
-  size: number;
-  style: string;
-  background: string;
-}
+
 interface Props {
   icon?: JSX.Element ; //| JSX.Element | Element
   image?: string;
@@ -14,26 +8,14 @@ interface Props {
   type:string
 }
 const ToolbarButton:React.FC<Props>  = props => {
-  let button
-  if (props.type==='draw'){
-    button=
-    <div>
-      <button className="toolbarButton" onClick={()=>props.onClick('draw')}>{props.icon}</button>
-    </div>
-  } else if (props.type==='eraser'){
-    button=
-    <div>
-      <button className="toolbarButton" onClick = {()=>props.onClick("color", "white")}><img src={props.image} alt="Eraser" /></button>
-    </div>
-  } else {
-    button=
-    <div>
-      <button className="toolbarButton" onClick = {()=>props.onClick()}>{props.icon}</button>
-    </div>
+  let parameters:null[]|string[] = [null];
+  parameters = props.type==='draw'?['draw']:props.type==='eraser'? ["shape","draw","color","white"]:[null]
+  let icon = props.type==='eraser'?<img src={props.image} alt="Eraser"/>: props.icon
 
-  }
   return(
-    button
+    <div>
+      <button className="toolbarButton" onClick={()=>props.onClick(...parameters)}>{icon}</button>
+    </div>
   )
 }
 

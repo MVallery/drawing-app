@@ -274,6 +274,27 @@ const App = (props:any) => {
     setRemovedPoints(tempRemovedPoints)
     setPoints(tempPoints)
   }
+  let cursor = '';
+  switch (toolSettings.shape) {
+    case 'draw':
+      console.log(toolSettings.color)
+      if (toolSettings.color==='white'){
+        cursor="eraserCursor";
+      } else {
+        cursor = "drawCursor"
+      }
+      break;
+    case 'line':
+      cursor="linePolygonCursor";
+      break;
+    case 'polygon':
+      cursor="linePolygonCursor";
+      break;
+    default:
+      cursor = ''
+      break;
+  }
+
   let svgShapes = [];
   let svgTempLine = (
             <line
@@ -377,7 +398,7 @@ const App = (props:any) => {
 
         <svg
           id="container"
-          className="svg"
+          className={`svg ${cursor}`}
           style={{
             width: "1000px",
             height: "500px",
