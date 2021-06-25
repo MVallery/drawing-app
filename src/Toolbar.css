@@ -1,7 +1,7 @@
 
 .toolbarContainer{
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
   /* background-color: #b4b4b4 */
   width: 1000px;

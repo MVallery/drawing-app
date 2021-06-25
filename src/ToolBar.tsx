@@ -19,17 +19,10 @@ import AutorenewIcon from "@material-ui/icons/Autorenew";
 import ToolbarButton from './ToolbarButton';
 import './Toolbar.css'
 
-const useStyles = makeStyles({
-  root: {
-    width: 300,
-    color:'red',
-    paddingLeft:'10px',
-  },
-});
-
 interface ToolSettings {
   shape: string;
   color: string;
+  secColor: string;
   size: number;
   style: string;
   background: string;
@@ -37,12 +30,15 @@ interface ToolSettings {
 interface Props {
   closeColorPicker: () => void;
   displayColorPicker: boolean;
+  displaySecColorPicker: boolean;
   handleDisplayColorPicker: () => void;
+  handleDisplaySecColorPicker: () => void;
   toolSettings: ToolSettings;
   setToolSettings: React.Dispatch<
     React.SetStateAction<{
       size: number;
       color: string;
+      secColor: string;
       style: string;
       background: string;
       shape: string;
@@ -55,6 +51,7 @@ interface Props {
 }
 const Toolbar: React.FC<Props> = (props) => {
   const [colorSelect, setColorSelect] = useState("rgba(20,20,10,5)");
+  const [secColorSelect, setSecColorSelect] = useState("rgba(90,70,200,5)")
   const [shapeMenu, setShapeMenu] = useState(null);
 
   const CustomSlider = createMuiTheme({
@@ -66,6 +63,7 @@ const Toolbar: React.FC<Props> = (props) => {
           height: 10,
           padding: "13px 0",
           backgroundColor: "#cecece",
+          width: 200,
       },
       track: {
           height: 4,
@@ -95,10 +93,14 @@ const Toolbar: React.FC<Props> = (props) => {
   }
   })
 
-  const handleColorSelect = (e: any) => {
+  const handleColorSelect = (e: any, name:string) => {
     const { r, b, g, a } = e.rgb;
-    setColorSelect(`rgba(${r}, ${g}, ${b}, ${a})`);
-    updateToolSettingsClick("color", `rgba(${r}, ${g}, ${b}, ${a})`);
+    if (name==='color'){
+      setColorSelect(`rgba(${r}, ${g}, ${b}, ${a})`);
+    } else {
+      setSecColorSelect(`rgba(${r}, ${g}, ${b}, ${a})`);
+    }
+    updateToolSettingsClick(name, `rgba(${r}, ${g}, ${b}, ${a})`);
   };
   const updateToolSettingsClick = (property: string, value: string, property2?:string, value2?: string) => {
     let tempToolSettings = JSON.parse(JSON.stringify(props.toolSettings));
@@ -128,7 +130,6 @@ const Toolbar: React.FC<Props> = (props) => {
     updateToolSettingsClick("color", colorSelect, "shape", shape)
   };
 
-  const classes = useStyles();
   let shapeTitle = "Shape Tool";
   let shapeIcon = CircleSquare;
   let [eraserActiveStyle, drawActiveStyle, shapeActiveStyle] = ['','', '']
@@ -178,11 +179,12 @@ const Toolbar: React.FC<Props> = (props) => {
           </Menu>
         </div>
 
-        <ToolbarButton type="draw" onClick={selectShape} icon={<CreateIcon/>} class={drawActiveStyle}/>
-        <ToolbarButton type="eraser" onClick={updateToolSettingsClick} image={Eraser} class={eraserActiveStyle}/>
-        <ToolbarButton type="button" onClick={props.handleDisplayColorPicker} icon={<PaletteIcon />}/>
+        <ToolbarButton type="Pen" onClick={selectShape} icon={<CreateIcon/>} class={drawActiveStyle}/>
+        <ToolbarButton type="Eraser" onClick={updateToolSettingsClick} image={Eraser} class={eraserActiveStyle}/>
+        <ToolbarButton type="Primary" onClick={props.handleDisplayColorPicker} icon={<PaletteIcon />}/>
+        <ToolbarButton type="Secondary" onClick={props.handleDisplaySecColorPicker} icon={<PaletteIcon />}/>
 
-        <div className={classes.root}>
+        <div>
           {/* <Typography id="discrete-slider-small-steps" gutterBottom>
             Line Width */}
           {/* </Typography> */}
@@ -203,9 +205,9 @@ const Toolbar: React.FC<Props> = (props) => {
           />
           </ThemeProvider>
         </div>
-        <ToolbarButton type="button" onClick={props.undo} icon= {<UndoIcon />}/>
-        <ToolbarButton type="button" onClick={props.redo} icon={<RedoIcon />}/>
-        <ToolbarButton type="button" onClick={props.clearPoints} icon={<AutorenewIcon />}/>
+        <ToolbarButton type="Undo" onClick={props.undo} icon= {<UndoIcon />}/>
+        <ToolbarButton type="Redo" onClick={props.redo} icon={<RedoIcon />}/>
+        <ToolbarButton type="Clear All" onClick={props.clearPoints} icon={<AutorenewIcon />}/>
 
         {props.displayColorPicker ? (
           <ClickAwayListener onClickAway={props.closeColorPicker}>
@@ -214,7 +216,21 @@ const Toolbar: React.FC<Props> = (props) => {
                 color={colorSelect}
                 className="colorPicker"
                 onChange={(e: any) => {
-                  handleColorSelect(e);
+                  handleColorSelect(e, "color");
+                }}
+              />
+            </div>
+          </ClickAwayListener>
+        ) : null}
+
+        {props.displaySecColorPicker ? (
+          <ClickAwayListener onClickAway={props.closeColorPicker}>
+            <div style={{ position: "absolute" }}>
+              <SketchPicker
+                color={secColorSelect}
+                className="colorPicker"
+                onChange={(e: any) => {
+                  handleColorSelect(e, "secColor");
                 }}
               />
             </div>

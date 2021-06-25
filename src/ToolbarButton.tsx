@@ -10,12 +10,12 @@ interface Props {
 }
 const ToolbarButton:React.FC<Props>  = props => {
   let parameters:null[]|string[] = [null];
-  parameters = props.type==='draw'?['draw']:props.type==='eraser'? ["shape","draw","color","white"]:[null]
-  let icon = props.type==='eraser'?<img src={props.image} alt="Eraser"/>: props.icon
+  parameters = props.type==='Draw'?['Draw']:props.type==='Eraser'? ["shape","draw","color","white"]:[null]
+  let icon = props.type==='Eraser'?<img src={props.image} alt="Eraser"/>: props.icon
 
   return(
     <div>
-      <button className={`${props.class} toolbarButton`} onClick={()=>props.onClick(...parameters)}>{icon}</button>
+      <button className={`${props.class} toolbarButton`} onClick={()=>props.onClick(...parameters)}>{props.type}<br/>{icon}</button>
     </div>
   )
 }

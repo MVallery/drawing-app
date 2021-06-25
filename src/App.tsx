@@ -17,6 +17,7 @@ interface InitialPoints {
 const initialToolSettings = {
   size:10,
   color:'black',
+  secColor:'blue',
   style:'normal', 
   background:'white',
   shape:'draw',
@@ -31,6 +32,7 @@ const initialPoints = {
   y2: null,
   r: null,
   color: 'black',
+  secColor:'blue',
   size: 10
 }
 
@@ -41,12 +43,19 @@ const App = (props:any) => {
   const [touchStart, setTouchStart] = useState(false);
   const [toolSettings, setToolSettings] = useState(initialToolSettings)
   const [displayColorPicker, setDisplayColorPicker] = useState(false)
+  const [displaySecColorPicker, setDisplaySecColorPicker] = useState(false)
+
   const [removedPoints, setRemovedPoints] = useState([]);
   const handleDisplayColorPicker= () =>{
     setDisplayColorPicker(!displayColorPicker)
   };
+  const handleDisplaySecColorPicker= () =>{
+    setDisplaySecColorPicker(!displaySecColorPicker)
+  };
   const closeColorPicker = () => {
     setDisplayColorPicker(false)
+    setDisplaySecColorPicker(false)
+
   };
   const onMouseDown = (e: React.MouseEvent) => {
     setMouseDown(true);
@@ -116,7 +125,7 @@ const App = (props:any) => {
       let radius = (Math.sqrt(
                       (Math.abs(tempPlaceholderLine.x-(e.clientX-rect.left))**2)+
                       (Math.abs(tempPlaceholderLine.y-(e.clientY-rect.top))**2)))
-      tempPlaceholderLine = {...tempPlaceholderLine, r:radius, fill:toolSettings.color}
+      tempPlaceholderLine = {...tempPlaceholderLine, r:radius, fill:toolSettings.color, stroke:toolSettings.secColor, strokeWidth:toolSettings.size}
       setPlaceholderLine(tempPlaceholderLine)
     }
     else{
@@ -147,7 +156,7 @@ const App = (props:any) => {
       let radius = (Math.sqrt(
                       (Math.abs(tempPlaceholderLine.x-(e.touches[0].pageX-rect.left))**2)+
                       (Math.abs(tempPlaceholderLine.y-(e.touches[0].pageY-rect.top))**2)))
-      tempPlaceholderLine = {...tempPlaceholderLine, r:radius, fill:toolSettings.color}
+      tempPlaceholderLine = {...tempPlaceholderLine, r:radius, fill:toolSettings.color, stroke:toolSettings.secColor, strokeWidth: toolSettings.size}
       setPlaceholderLine(tempPlaceholderLine)
     }else {
       return
@@ -306,6 +315,9 @@ const App = (props:any) => {
             cy={String(placeholderLine.y)}
             r={String(placeholderLine.r)}
             fill = {String(toolSettings.color)}
+            stroke= {String(toolSettings.secColor)}
+            strokeWidth= {String(toolSettings.size)}
+
             />
   )
   for (let i = 0; i < points.length; i++) {
@@ -316,6 +328,8 @@ const App = (props:any) => {
           cy={String(points[i].y)}
           r= {String(points[i].r)}
           fill = {String(points[i].color)}
+          stroke= {String(points[i].secColor)}
+          strokeWidth= {String(points[i].size)}
         />
       );
 
@@ -376,7 +390,9 @@ const App = (props:any) => {
         <Toolbar 
           closeColorPicker={closeColorPicker}
           displayColorPicker={displayColorPicker}
+          displaySecColorPicker={displaySecColorPicker}
           handleDisplayColorPicker={handleDisplayColorPicker}
+          handleDisplaySecColorPicker={handleDisplaySecColorPicker}
           toolSettings={toolSettings}
           setToolSettings = {setToolSettings}
           clearPoints={clearPoints}
