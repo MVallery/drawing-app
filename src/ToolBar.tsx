@@ -4,9 +4,8 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Button from "@material-ui/core/Button";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
-import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import UndoIcon from "@material-ui/icons/Undo";
 import RedoIcon from "@material-ui/icons/Redo";
 import CreateIcon from "@material-ui/icons/Create"; 
@@ -18,12 +17,16 @@ import Eraser from "./eraser.svg";
 import Polygon from "./triangle.svg";
 import AutorenewIcon from "@material-ui/icons/Autorenew";
 import ToolbarButton from './ToolbarButton';
+import './Toolbar.css'
 
 const useStyles = makeStyles({
   root: {
     width: 300,
+    color:'red',
+    paddingLeft:'10px',
   },
 });
+
 interface ToolSettings {
   shape: string;
   color: string;
@@ -53,6 +56,44 @@ interface Props {
 const Toolbar: React.FC<Props> = (props) => {
   const [colorSelect, setColorSelect] = useState("rgba(20,20,10,5)");
   const [shapeMenu, setShapeMenu] = useState(null);
+
+  const CustomSlider = createMuiTheme({
+    overrides:{
+      MuiSlider:{
+        root: {
+          // color: "#6f8eff",
+          color: 'black',
+          height: 10,
+          padding: "13px 0",
+          backgroundColor: "#cecece",
+      },
+      track: {
+          height: 4,
+          borderRadius: 2,
+      },
+      mark:{
+        height:10
+      },
+      valueLabel:{
+        left: 'calc(50% - 16px)',
+        color: 'black'
+      },
+      thumb: {
+          height: props.toolSettings.size,
+          width: props.toolSettings.size,
+          backgroundColor: colorSelect,
+          border: "1px solid currentColor",
+          marginTop: -props.toolSettings.size/2,
+          marginLeft: -props.toolSettings.size/2,
+          boxShadow: "#ebebeb 0 2px 2px",
+          "&:focus, &:hover, &$active": {
+              boxShadow: "#ccc 0 2px 3px 1px",
+          },
+          color: "#fff",
+      }
+    }
+  }
+  })
 
   const handleColorSelect = (e: any) => {
     const { r, b, g, a } = e.rgb;
@@ -90,23 +131,34 @@ const Toolbar: React.FC<Props> = (props) => {
   const classes = useStyles();
   let shapeTitle = "Shape Tool";
   let shapeIcon = CircleSquare;
+  let [eraserActiveStyle, drawActiveStyle, shapeActiveStyle] = ['','', '']
   if (props.toolSettings.shape === "circle") {
     shapeTitle = "Circle";
     shapeIcon = Circle;
+    shapeActiveStyle="activeButton"
   } else if (props.toolSettings.shape === "line") {
     shapeTitle = "Line";
     shapeIcon = Line;
+    shapeActiveStyle="activeButton"
+
   } else if (props.toolSettings.shape === "polygon") {
     shapeTitle = "Polygon";
     shapeIcon = Polygon;
+    shapeActiveStyle="activeButton"
+
+  } else if (props.toolSettings.shape==="draw" && props.toolSettings.color==="white"){
+    eraserActiveStyle="activeButton"
+  } else {
+    drawActiveStyle = "activeButton"
   }
   return (
     <React.Fragment>
-      <div style={{ display: "flex" }}>
+      <div className="toolbarContainer">
         <div >
-          <button className="toolbarButton"
+          <button className={`${shapeActiveStyle} toolbarButton`}
           style={{width:'80px'}}
             onClick={openShapeMenu}
+            
           >
             {shapeTitle}
             <img src={shapeIcon} alt="shape" />
@@ -126,32 +178,34 @@ const Toolbar: React.FC<Props> = (props) => {
           </Menu>
         </div>
 
-      <ToolbarButton type="draw" onClick={selectShape} icon={<CreateIcon/>}/>
-      <ToolbarButton type="eraser" onClick={updateToolSettingsClick} image={Eraser}/>
-      <ToolbarButton type="button" onClick={props.handleDisplayColorPicker} icon={<PaletteIcon />}/>
-      <ToolbarButton type="button" onClick={props.undo} icon= {<UndoIcon />}/>
-      <ToolbarButton type="button" onClick={props.redo} icon={<RedoIcon />}/>
-      <ToolbarButton type="button" onClick={props.clearPoints} icon={<AutorenewIcon />}/>
+        <ToolbarButton type="draw" onClick={selectShape} icon={<CreateIcon/>} class={drawActiveStyle}/>
+        <ToolbarButton type="eraser" onClick={updateToolSettingsClick} image={Eraser} class={eraserActiveStyle}/>
+        <ToolbarButton type="button" onClick={props.handleDisplayColorPicker} icon={<PaletteIcon />}/>
 
         <div className={classes.root}>
-          <Typography id="discrete-slider-small-steps" gutterBottom>
-            Line Width
-          </Typography>
+          {/* <Typography id="discrete-slider-small-steps" gutterBottom>
+            Line Width */}
+          {/* </Typography> */}
+          <ThemeProvider theme={CustomSlider}>
           <Slider
             defaultValue={10}
             getAriaValueText={(value: number) => `${value} px`}
             aria-labelledby="discrete-slider-small-steps"
-            step={2}
+            step={5}
             name="size"
             value={props.toolSettings.size}
             marks
             onChange={handleSlider}
             onChangeCommitted={handleSlider}
-            min={2}
-            max={50}
+            min={5}
+            max={40}
             valueLabelDisplay="auto"
           />
+          </ThemeProvider>
         </div>
+        <ToolbarButton type="button" onClick={props.undo} icon= {<UndoIcon />}/>
+        <ToolbarButton type="button" onClick={props.redo} icon={<RedoIcon />}/>
+        <ToolbarButton type="button" onClick={props.clearPoints} icon={<AutorenewIcon />}/>
 
         {props.displayColorPicker ? (
           <ClickAwayListener onClickAway={props.closeColorPicker}>

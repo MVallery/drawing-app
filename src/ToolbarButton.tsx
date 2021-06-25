@@ -5,7 +5,8 @@ interface Props {
   icon?: JSX.Element ; //| JSX.Element | Element
   image?: string;
   onClick: Function;
-  type:string
+  type:string;
+  class?:string | null;
 }
 const ToolbarButton:React.FC<Props>  = props => {
   let parameters:null[]|string[] = [null];
@@ -14,7 +15,7 @@ const ToolbarButton:React.FC<Props>  = props => {
 
   return(
     <div>
-      <button className="toolbarButton" onClick={()=>props.onClick(...parameters)}>{icon}</button>
+      <button className={`${props.class} toolbarButton`} onClick={()=>props.onClick(...parameters)}>{icon}</button>
     </div>
   )
 }

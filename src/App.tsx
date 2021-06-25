@@ -50,8 +50,6 @@ const App = (props:any) => {
   };
   const onMouseDown = (e: React.MouseEvent) => {
     setMouseDown(true);
-
-    console.log('onmousedown')
     let tempPoints = JSON.parse(JSON.stringify(points));
     let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
     var rect = document.getElementById("container")!.getBoundingClientRect();
@@ -72,7 +70,6 @@ const App = (props:any) => {
     }
   };
   const onMouseUp = (e: React.MouseEvent) => {
-    console.log('mouseup')
     const tempPoints = JSON.parse(JSON.stringify(points));
     let tempPlaceholderLine = JSON.parse(JSON.stringify(placeholderLine));
     var rect = document.getElementById("container")!.getBoundingClientRect();
@@ -119,7 +116,6 @@ const App = (props:any) => {
       let radius = (Math.sqrt(
                       (Math.abs(tempPlaceholderLine.x-(e.clientX-rect.left))**2)+
                       (Math.abs(tempPlaceholderLine.y-(e.clientY-rect.top))**2)))
-      console.log(radius, tempPlaceholderLine)
       tempPlaceholderLine = {...tempPlaceholderLine, r:radius, fill:toolSettings.color}
       setPlaceholderLine(tempPlaceholderLine)
     }
@@ -151,7 +147,6 @@ const App = (props:any) => {
       let radius = (Math.sqrt(
                       (Math.abs(tempPlaceholderLine.x-(e.touches[0].pageX-rect.left))**2)+
                       (Math.abs(tempPlaceholderLine.y-(e.touches[0].pageY-rect.top))**2)))
-      console.log(radius, tempPlaceholderLine)
       tempPlaceholderLine = {...tempPlaceholderLine, r:radius, fill:toolSettings.color}
       setPlaceholderLine(tempPlaceholderLine)
     }else {
@@ -202,7 +197,6 @@ const App = (props:any) => {
     setTouchStart(false)
   }
   const onCanvasClick = (e: React.MouseEvent) => {
-    console.log('oncanvas', points)
     let tempPoints = JSON.parse(JSON.stringify(points));
     var rect = document.getElementById("container")!.getBoundingClientRect();
     if(toolSettings.shape==='draw'){
@@ -249,7 +243,6 @@ const App = (props:any) => {
   }
   const redo = () => {
     let tempPoints = JSON.parse(JSON.stringify(points));
-    console.log(removedPoints)
     let tempRemovedPoints = JSON.parse(JSON.stringify(removedPoints));
     let removedPoint
     if (!tempRemovedPoints){
@@ -263,7 +256,6 @@ const App = (props:any) => {
           removedPoint = tempRemovedPoints.pop();
           tempPoints.push(removedPoint)
         } else {
-          console.log('break')
           break;
         }
       }
@@ -277,7 +269,6 @@ const App = (props:any) => {
   let cursor = '';
   switch (toolSettings.shape) {
     case 'draw':
-      console.log(toolSettings.color)
       if (toolSettings.color==='white'){
         cursor="eraserCursor";
       } else {
@@ -381,7 +372,7 @@ const App = (props:any) => {
 
   return (
     <React.Fragment>
-      <div className="toolbarContainer" style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+      <div className="mainContainer" style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
         <Toolbar 
           closeColorPicker={closeColorPicker}
           displayColorPicker={displayColorPicker}
@@ -393,7 +384,7 @@ const App = (props:any) => {
           undo={undo}
           redo={redo}
         />
-      <div className="mainContainer" onMouseUp={onMouseUp} onTouchEnd={onTouchEnd}>
+      <div className="svgContainer" onMouseUp={onMouseUp} onTouchEnd={onTouchEnd}>
 
 
         <svg

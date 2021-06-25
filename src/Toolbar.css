@@ -1,0 +1,11 @@
+
+.toolbarContainer{
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  /* background-color: #b4b4b4 */
+  width: 1000px;
+  /* height: 100vh; */
+  justify-content: space-around;
+  background-color: #cecece;
+}

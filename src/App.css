@@ -7,7 +7,7 @@
   pointer-events: none;
 }
 
-.mainContainer{
+.svgContainer{
   width:100vw;
   display:flex;
   flex-direction:column;
@@ -16,7 +16,7 @@
   background-color:#b4b4b4
 }
 
-.toolbarContainer{
+.mainContainer{
   display: flex;
   flex-direction: column;
   align-items: center;
