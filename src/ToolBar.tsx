@@ -53,6 +53,7 @@ const Toolbar: React.FC<Props> = (props) => {
   const [colorSelect, setColorSelect] = useState("rgba(20,20,10,5)");
   const [secColorSelect, setSecColorSelect] = useState("rgba(90,70,200,5)")
   const [shapeMenu, setShapeMenu] = useState(null);
+  const [styleMenu, setStyleMenu] = useState(null);
 
   const CustomSlider = createMuiTheme({
     overrides:{
@@ -103,6 +104,12 @@ const Toolbar: React.FC<Props> = (props) => {
     updateToolSettingsClick(name, `rgba(${r}, ${g}, ${b}, ${a})`);
   };
   const updateToolSettingsClick = (property: string, value: string, property2?:string, value2?: string) => {
+    if (property==='shape' || property2==='shape'){
+      closeShapeMenu();
+      props.clearPlaceholderLine();
+    } else if (property==='style'|| property2==='style'){
+      closeStyleMenu();
+    }
     let tempToolSettings = JSON.parse(JSON.stringify(props.toolSettings));
     tempToolSettings[property] = value;
     if (property2){
@@ -123,10 +130,15 @@ const Toolbar: React.FC<Props> = (props) => {
   const closeShapeMenu = () => {
     setShapeMenu(null);
   };
+  const openStyleMenu = (event: { currentTarget: any }) => {
+    setStyleMenu(event.currentTarget);
+  };
+
+  const closeStyleMenu = () => {
+    setStyleMenu(null);
+  };
 
   const selectShape = (shape: string) => {
-    closeShapeMenu();
-    props.clearPlaceholderLine();
     updateToolSettingsClick("color", colorSelect, "shape", shape)
   };
 
@@ -152,6 +164,19 @@ const Toolbar: React.FC<Props> = (props) => {
   } else {
     drawActiveStyle = "activeButton"
   }
+
+  let styleTitle = "Normal";
+  if (props.toolSettings.style==="linearGradient"){
+    styleTitle="Linear Gradient";
+  } else if(props.toolSettings.style==="radialGradient"){
+    styleTitle="Radial Gradient"
+  } else if(props.toolSettings.style==='shadow'){
+    styleTitle="Shadow"
+  } else if (props.toolSettings.style==='blur'){
+    styleTitle='Blur'
+  }
+
+
   return (
     <React.Fragment>
       <div className="toolbarContainer">
@@ -171,19 +196,42 @@ const Toolbar: React.FC<Props> = (props) => {
             open={Boolean(shapeMenu)}
             onClose={closeShapeMenu}
           >
-            <MenuItem onClick={() => selectShape("line")}>Line</MenuItem>
-            <MenuItem onClick={() => selectShape("polygon")}>Polygon</MenuItem>
-            <MenuItem onClick={() => selectShape("circle")}>Circle</MenuItem>
+            <MenuItem onClick={() => updateToolSettingsClick("color", colorSelect, "shape", "line")}>Line</MenuItem>
+            <MenuItem onClick={() => updateToolSettingsClick("color", colorSelect, "shape","polygon")}>Polygon</MenuItem>
+            <MenuItem onClick={() => updateToolSettingsClick("color", colorSelect, "shape","circle")}>Circle</MenuItem>
             {/* <MenuItem onClick={()=>selectShape}>Rectangle</MenuItem> */}
             {/* <MenuItem onClick={()=>selectShape}>Rectangle</MenuItem> */}
           </Menu>
         </div>
 
-        <ToolbarButton type="Pen" onClick={selectShape} icon={<CreateIcon/>} class={drawActiveStyle}/>
+        <ToolbarButton type="Pen" onClick={updateToolSettingsClick} icon={<CreateIcon/>} class={drawActiveStyle}/>
         <ToolbarButton type="Eraser" onClick={updateToolSettingsClick} image={Eraser} class={eraserActiveStyle}/>
         <ToolbarButton type="Primary" onClick={props.handleDisplayColorPicker} icon={<PaletteIcon />}/>
         <ToolbarButton type="Secondary" onClick={props.handleDisplaySecColorPicker} icon={<PaletteIcon />}/>
+        <div >
+          <button className={`toolbarButton`}
+          style={{width:'80px'}}
+            onClick={openStyleMenu}
+            
+          >
+            {styleTitle}
+          </button>
+          <Menu
+            id="simple-menu"
+            anchorEl={styleMenu}
+            keepMounted
+            open={Boolean(styleMenu)}
+            onClose={closeStyleMenu}
+          >
+            <MenuItem onClick={() => updateToolSettingsClick("style","normal")}>Normal</MenuItem>
+            <MenuItem onClick={() => updateToolSettingsClick("style", "radialGradient")}>Radial Gradient</MenuItem>
+            <MenuItem onClick={() => updateToolSettingsClick("style", "linearGradient")}>Linear Gradient</MenuItem>
+            <MenuItem onClick={() => updateToolSettingsClick("style", "shadow")}>Shadow</MenuItem>
+            <MenuItem onClick={() => updateToolSettingsClick("style", "blur")}>Blur</MenuItem>
 
+
+          </Menu>
+        </div>
         <div>
           {/* <Typography id="discrete-slider-small-steps" gutterBottom>
             Line Width */}

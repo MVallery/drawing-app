@@ -10,7 +10,7 @@ interface Props {
 }
 const ToolbarButton:React.FC<Props>  = props => {
   let parameters:null[]|string[] = [null];
-  parameters = props.type==='Draw'?['Draw']:props.type==='Eraser'? ["shape","draw","color","white"]:[null]
+  parameters = props.type==='Pen'?["shape",'draw']:props.type==='Eraser'? ["shape","draw","color","white"]:[null]
   let icon = props.type==='Eraser'?<img src={props.image} alt="Eraser"/>: props.icon
 
   return(

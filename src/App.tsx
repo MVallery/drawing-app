@@ -11,6 +11,7 @@ interface InitialPoints {
   x2: number | null,
   y2: number | null,
   r: number | null,
+  style: string,
   color: string,
   size: number
 }
@@ -31,6 +32,7 @@ const initialPoints = {
   x2: null,
   y2: null,
   r: null,
+  style: 'normal',
   color: 'black',
   secColor:'blue',
   size: 10
@@ -109,11 +111,10 @@ const App = (props:any) => {
 
     if (toolSettings.shape==='draw'){
       tempPoints.push({
-        shape:toolSettings.shape,
+        ...toolSettings,
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
-        color: toolSettings.color,
-        size: toolSettings.size,
+
       });
       setPoints(tempPoints);
 
@@ -145,6 +146,7 @@ const App = (props:any) => {
         x: e.touches[0].pageX - rect.left,
         y: e.touches[0].pageY - rect.top,
         color: toolSettings.color,
+        style: toolSettings.style,
         size: toolSettings.size,
       });
       setPoints(newPoints);
@@ -294,7 +296,43 @@ const App = (props:any) => {
       cursor = ''
       break;
   }
+  let filter;
+  let tempFilter;
+  let tempFilterGradients;
+  // if (toolSettings.style==='radialGradient'){
+  //   filter = "radialGradient";
+  //   tempFilter= "tempFilter"
+  // } else if (toolSettings.style==='linearGradient'){
+  //   filter= "linearGradient";
+  //   tempFilter= "tempFilter";
+  // } else if (toolSettings.style==='shadow'){
+  //   filter="shadow"
+  //   tempFilter="tempFilter";
+  // }
+  tempFilterGradients = [
+          <radialGradient id={"radialGradientTempFilter"} cx="40%" cy="25%" r="80%" fx="50%" fy="50%">
+            <stop offset="0%" style={{stopColor:toolSettings.secColor,stopOpacity:1}} />
+            <stop offset="100%" style={{stopColor:toolSettings.color, stopOpacity:1}} />
+          </radialGradient>,
+          <linearGradient id={"linearGradientTempFilter"} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style={{stopColor:toolSettings.secColor,stopOpacity:1}} />
+            <stop offset="100%" style={{stopColor:toolSettings.color, stopOpacity:1}}  />
+          </linearGradient>,
+          <filter id={"shadowTempFilter"}>
+            <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+            <feOffset dx="2" dy="4" />
+            <feMerge>
+                <feMergeNode />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>,
+          <filter id={`blurTempFilter`}>
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" />
+          </filter>
 
+  ];
+
+  let filterList = [];
   let svgShapes = [];
   let svgTempLine = (
             <line
@@ -303,33 +341,77 @@ const App = (props:any) => {
               x2={String(placeholderLine.x2)}
               y2={String(placeholderLine.y2)}
               style={{
-                stroke: placeholderLine.color,
+                stroke: toolSettings.style==='radialGradient'|| toolSettings.style==='linearGradient'?`url(#${toolSettings.style}TempFilter)`:placeholderLine.color,
                 strokeWidth: placeholderLine.size,
                 strokeLinecap: "round",
             }}
+              filter={toolSettings.style==='shadow' || toolSettings.style==='blur'? `url(#${toolSettings.style}TempFilter)`:undefined}
+
+
           />
   )
   let svgTempCircle = (
+
           <circle
             cx={String(placeholderLine.x)}
             cy={String(placeholderLine.y)}
             r={String(placeholderLine.r)}
-            fill = {String(toolSettings.color)}
-            stroke= {String(toolSettings.secColor)}
-            strokeWidth= {String(toolSettings.size)}
+            fill = {filter==='radialGradient'||filter==='linearGradient'?`url(#${toolSettings.style}TempFilter)`:String(toolSettings.color)}
+            stroke= {!filter?String(toolSettings.secColor):undefined}
+            strokeWidth= {!filter?String(toolSettings.size):undefined}
+            filter={toolSettings.style==='shadow' || toolSettings.style==='blur'? `url(#${toolSettings.style}TempFilter)`:undefined}
 
             />
   )
+  
   for (let i = 0; i < points.length; i++) {
+    if (points[i].style==='radialGradient'){
+      filterList.push(
+        <radialGradient id={`radialGradient${i}`} cx="40%" cy="25%" r="80%" fx="50%" fy="50%">
+          <stop offset="0%" style={{stopColor:points[i].secColor,stopOpacity:1}} />
+          <stop offset="80%" style={{stopColor:points[i].color, stopOpacity:1}} />
+        </radialGradient>
+      )
+    } else if (points[i].style==='linearGradient'){
+      filterList.push(
+        <linearGradient id={`linearGradient${i}`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style={{stopColor:points[i].secColor,stopOpacity:1}} />
+          <stop offset="100%" style={{stopColor:points[i].color, stopOpacity:1}}  />
+        </linearGradient>
+      )
+    } else if (points[i].style==='shadow'){
+      filterList.push(
+        <filter id={`shadow${i}`}>
+        <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+        <feOffset dx="2" dy="4" />
+        <feMerge>
+            <feMergeNode />
+            <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+      )
+    } else if (points[i].style==='blur'){
+      filterList.push(
+        <filter id={`blur${i}`}>
+        <feGaussianBlur in="SourceGraphic" stdDeviation="5" />
+      </filter>
+      )
+    }
+
+    let colorStyle = points[i].style==='normal'|| points[i].style==='shadow'||points[i].style==='blur'? points[i].color: `url(#${points[i].style}${i})`
+    let secColorStyle= points[i].style==='normal'|| points[i].style==='blur' ? String(points[i].secColor):undefined
+    let filterStyle = points[i].style==='shadow' || points[i].style==='blur'? `url(#${points[i].style}${i})`:undefined
+
     if (points[i].shape==='circle'){
       svgShapes.push(
         <circle
           cx={String(points[i].x)}
           cy={String(points[i].y)}
           r= {String(points[i].r)}
-          fill = {String(points[i].color)}
-          stroke= {String(points[i].secColor)}
-          strokeWidth= {String(points[i].size)}
+          fill = {colorStyle}
+          stroke= {secColorStyle}
+          strokeWidth= {points[i].style==='normal' ||points[i].style==='blur' ? String(points[i].size):undefined}
+          filter={filterStyle}
         />
       );
 
@@ -341,10 +423,13 @@ const App = (props:any) => {
         x2={String(points[i].x2)}
         y2={String(points[i].y2)}
         style={{
-          stroke: points[i].color,
+          stroke: colorStyle,
           strokeWidth: points[i].size,
           strokeLinecap: "round",
         }}
+        filter={filterStyle}
+
+
       />
       );
   }else if (points[i].x !== null && (i === 0 || points[i - 1].x === null || points[i-1].shape !== 'draw')) {
@@ -357,10 +442,12 @@ const App = (props:any) => {
               x2={String(points[i].x)}
               y2={String(points[i].y)}
               style={{
-                stroke: points[i].color,
+                stroke: colorStyle,
                 strokeWidth: points[i].size,
                 strokeLinecap: "round",
               }}
+              filter={filterStyle}
+
             />
           );
       } 
@@ -373,16 +460,19 @@ const App = (props:any) => {
               x2={String(points[i].x)}
               y2={String(points[i].y)}
               style={{
-                stroke: points[i].color,
+                stroke: colorStyle,
                 strokeWidth: points[i].size,
                 strokeLinecap:"round",
               }}
+              filter={filterStyle}
+
             />
         )
       } 
     
     }
   }
+
 
   return (
     <React.Fragment>
@@ -419,6 +509,10 @@ const App = (props:any) => {
           onMouseMove={mouseDown ? onMouseMove : undefined}
           onTouchMove={touchStart ? onTouchMove : undefined}
         >
+
+       {filterList}
+       {tempFilterGradients}
+
           {svgShapes}
           {(placeholderLine.x1 && placeholderLine.x2)?svgTempLine:null}
           {placeholderLine.r ? svgTempCircle:null}
